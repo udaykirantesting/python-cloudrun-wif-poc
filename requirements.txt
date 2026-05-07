@@ -11,24 +11,23 @@
 #cloud-sql-python-connector[pg8000]==1.7.0
 #pydantic==2.5.3
 
-# Web Framework & Server
+# Web Server & Framework
 fastapi==0.109.0
 uvicorn==0.27.0
 
-# Database Logic & Drivers
+# Database Logic (PostgreSQL)
 sqlalchemy==2.0.25
-# pg8000 is a pure-python driver recommended for Cloud SQL Connector
 pg8000==1.30.3
 
-# Google Cloud Connectivity
-# [pg8000] extra ensures compatibility between the connector and the driver
+# Google Cloud SQL Secure Connector
+# The [pg8000] suffix is critical for driver compatibility
 cloud-sql-python-connector[pg8000]==1.7.0
 
-# Data Validation
+# Data Validation & Schemas
 pydantic==2.5.3
 pydantic[email]==2.5.3
 
-# Static File Handling (to serve index.html)
+# Required by FastAPI to serve the index.html file
 aiofiles==23.2.1
 
 
