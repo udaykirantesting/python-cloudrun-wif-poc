@@ -6,7 +6,7 @@ on:
       - main  # Deploy only when code is pushed to the main branch
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  PROJECT_ID: project-2a99e1ae-69fc-4f91-8da   ###${{ secrets.GCP_PROJECT_ID }}
   REGION: us-central1
   REPO_NAME: my-repo
   IMAGE_NAME: python-sql-app
@@ -27,8 +27,8 @@ jobs:
       - name: Google Auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+          workload_identity_provider: 'projects/537727641358/locations/global/workloadIdentityPools/github-pool1/providers/github-provider' ##${{ secrets.WIF_PROVIDER }}
+          service_account: cloud-run-sql-sa@project-2a99e1ae-69fc-4f91-8da.iam.gserviceaccount.com ###${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       # 2. Configure Docker to use Artifact Registry
       - name: Docker Auth
