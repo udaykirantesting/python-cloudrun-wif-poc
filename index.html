@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote for India's Top 3 Cities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md">
+        <h1 class="text-3xl font-bold text-center text-orange-600 mb-2">India Voting App</h1>
+        <p class="text-center text-gray-600 mb-6">Select exactly <span class="font-bold text-blue-600">3</span> favorite cities</p>
+
+        <!-- Step 1: User Info -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700">Your Email</label>
+            <input type="email" id="email" placeholder="kiran@example.com" 
+                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-orange-500 focus:border-orange-500">
+        </div>
+
+        <!-- Step 2: City List -->
+        <div id="city-list" class="space-y-3 mb-6">
+            <!-- Cities will be loaded here via JS -->
+            <p class="text-center text-gray-400 italic">Loading cities...</p>
+        </div>
+
+        <!-- Step 3: Actions -->
+        <button onclick="submitVotes()" id="submit-btn" 
+                class="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition duration-200 disabled:opacity-50">
+            Cast My Votes
+        </button>
+
+        <!-- Results Link -->
+        <div class="mt-6 border-t pt-4">
+            <button onclick="loadResults()" class="text-blue-500 hover:underline text-sm w-full text-center">
+                View Real-time Results
+            </button>
+            <div id="results-display" class="hidden mt-4 bg-blue-50 p-4 rounded-lg">
+                <!-- Results injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = ""; // Empty string assumes backend is on same domain (Cloud Run)
+        let selectedCities = [];
+
+        // 1. Fetch cities from Python Backend on load
+        async function fetchCities() {
+            const response = await fetch(`${API_URL}/cities`);
+            const cities = await response.json();
+            const list = document.getElementById('city-list');
+            list.innerHTML = '';
+            
+            cities.forEach(city => {
+                const div = document.createElement('div');
+                div.className = "flex items-center p-3 border rounded-lg hover:bg-gray-50 transition cursor-pointer";
+                div.innerHTML = `
+                    <input type="checkbox" value="${city.id}" id="city-${city.id}" class="h-5 w-5 text-orange-600" onchange="handleCheck(this)">
+                    <label for="city-${city.id}" class="ml-3 text-lg text-gray-800 cursor-pointer w-full">${city.name}</label>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // 2. Manage "Exactly 3" Selection
+        function handleCheck(checkbox) {
+            if (checkbox.checked) {
+                selectedCities.push(parseInt(checkbox.value));
+            } else {
+                selectedCities = selectedCities.filter(id => id !== parseInt(checkbox.value));
+            }
+            
+            // Visual feedback: Disable others if 3 are picked
+            const checkboxes = document.querySelectorAll('#city-list input[type="checkbox"]');
+            if (selectedCities.length >= 3) {
+                checkboxes.forEach(cb => { if(!cb.checked) cb.disabled = true; });
+            } else {
+                checkboxes.forEach(cb => cb.disabled = false);
+            }
+        }
+
+        // 3. Submit to API
+        async function submitVotes() {
+            const email = document.getElementById('email').value;
+            if (!email || selectedCities.length !== 3) {
+                alert("Please provide email and select exactly 3 cities!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/vote`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ voter_email: email, city_ids: selectedCities })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("Success! " + data.message);
+                    location.reload(); // Refresh to show results
+                } else {
+                    alert("Error: " + data.detail);
+                }
+            } catch (err) {
+                alert("Server connection failed.");
+            }
+        }
+
+        // 4. Load Results
+        async function loadResults() {
+            const response = await fetch(`${API_URL}/results`);
+            const results = await response.json();
+            const display = document.getElementById('results-display');
+            display.classList.remove('hidden');
+            display.innerHTML = '<h3 class="font-bold mb-2">Live Standings:</h3>';
+            
+            results.forEach(city => {
+                display.innerHTML += `
+                    <div class="flex justify-between text-sm py-1">
+                        <span>${city.name}</span>
+                        <span class="font-mono font-bold text-orange-600">${city.vote_count} votes</span>
+                    </div>
+                `;
+            });
+        }
+
+        window.onload = fetchCities;
+    </script>
+</body>
+</html>
