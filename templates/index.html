@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Vote for India's Best Cities</title></head>
+<body>
+    <h1>Pick your Top 3 Cities in India</h1>
+    <form method="POST">
+        {% for city in cities %}
+            <input type="checkbox" name="cities" value="{{ city }}"> {{ city }}<br>
+        {% endfor %}
+        <br>
+        <button type="submit">Submit Votes</button>
+    </form>
+</body>
+</html>
