@@ -65,6 +65,14 @@ from pydantic import BaseModel, Field
 from google.cloud.sql.connector import Connector
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, text
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+# Serve index.html at the root URL
+@app.get("/")
+async def serve_index():
+    return FileResponse('index.html')
+
 
 # --- CONFIGURATION ---
 INSTANCE_CONNECTION_NAME = os.environ.get("INSTANCE_CONNECTION_NAME")
